@@ -54,7 +54,9 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
   # * ZMQ::IDENTITY - named queues
   # * ZMQ::SWAP_SIZE - space for disk overflow
   #
-  # Example: sockopt => ["ZMQ::HWM", 50, "ZMQ::IDENTITY", "my_named_queue"]
+  # Example:
+  # [source,ruby]
+  # sockopt => ["ZMQ::HWM", 50, "ZMQ::IDENTITY", "my_named_queue"]
   config :sockopt, :validate => :hash
 
   public
