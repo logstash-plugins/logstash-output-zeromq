@@ -13,7 +13,6 @@ require "logstash/namespace"
 class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
 
   config_name "zeromq"
-  milestone 2
 
   default :codec, "json"
 
