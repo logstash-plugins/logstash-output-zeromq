@@ -96,9 +96,9 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
   end # def register
 
   public
-  def teardown
+  def close
     error_check(@zsocket.close, "while closing the socket")
-  end # def teardown
+  end # def close
 
   private
   def server?
