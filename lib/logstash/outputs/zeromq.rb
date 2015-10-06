@@ -107,7 +107,7 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
 
   public
   def receive(event)
-    return unless output?(event)
+    
 
     @codec.encode(event)
   end # def receive
