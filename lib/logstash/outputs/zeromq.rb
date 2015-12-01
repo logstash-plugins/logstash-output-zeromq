@@ -59,6 +59,13 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
   #     }
   config :sockopt, :validate => :hash
 
+  # Defines if zeromq return code EAGAIN is an error
+  # This may be used e.g. if ZMQ::SNDTIMEO is set or in combination with `noblock`
+  config :eagain_not_error, :validate => :boolean, :default => false
+
+  # Defines if the zeromq send operation is blocking or not, if setting is true, events are sent in non-blocking mode.
+  config :noblock, :validate => :boolean, :default => false
+
   public
   def register
     load_zmq
@@ -96,7 +103,11 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
       error_check(@zsocket.send_string(topic, ZMQ::SNDMORE), "in topic send_string")
     end
     @logger.debug? && @logger.debug("0mq: sending", :event => payload)
-    error_check(@zsocket.send_string(payload), "in send_string")
+    if @noblock
+      error_check(@zsocket.send_string(payload, ZMQ::DONTWAIT), "in send_string", @eagain_not_error)
+    else
+      error_check(@zsocket.send_string(payload), "in send_string")
+    end
   rescue => e
     warn e.inspect
     @logger.warn("0mq output exception", :address => @address, :exception => e)
