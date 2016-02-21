@@ -26,7 +26,7 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
   #
   # * pushpull - inputs are pull, outputs are push
   # * pubsub - inputs are subscribers, outputs are publishers
-  # * pair - inputs are clients, inputs are servers
+  # * pair - inputs are clients, outputs are servers
   #
   # If the predefined topology flows don't work for you,
   # you can change the 'mode' setting
