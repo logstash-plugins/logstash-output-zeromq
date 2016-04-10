@@ -121,8 +121,8 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
     if @topology == "pubsub"
       # TODO(sissel): Need to figure out how to fit this into the codecs system.
       #@logger.debug("0mq output: setting topic to: #{event.sprintf(@topic)}")
-      #error_check(@zsocket.send_string(event.sprintf(@topic), ZMQ::SNDMORE),
-                  #"in topic send_string")
+      error_check(@zsocket.send_string(event.sprintf(@topic), ZMQ::SNDMORE),
+                  "in topic send_string")
     end
     error_check(@zsocket.send_string(payload), "in send_string")
   rescue => e
