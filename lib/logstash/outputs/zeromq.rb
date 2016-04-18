@@ -62,8 +62,8 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
   public
   def register
     require "ffi-rzmq"
-    require "logstash/util/zeromq"
-    self.class.send(:include, LogStash::Util::ZeroMQ)
+    require "logstash/plugin_mixins/zeromq"
+    self.class.send(:include, LogStash::PluginMixins::ZeroMQ)
 
     if @mode == "server"
       workers_not_supported("With 'mode => server', only one zeromq socket may bind to a port and may not be shared among threads. Going to single-worker mode for this plugin!")
@@ -104,26 +104,17 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
     end
   end # def close
 
+  def receive(event)
+    @codec.encode(event)
+  end
+
   private
   def server?
     @mode == "server"
   end # def server?
 
-  public
-  def receive(event)
-    
-
-    @codec.encode(event)
-  end # def receive
-
   def publish(event, payload)
     @logger.debug? && @logger.debug("0mq: sending", :event => payload)
-    if @topology == "pubsub"
-      # TODO(sissel): Need to figure out how to fit this into the codecs system.
-      #@logger.debug("0mq output: setting topic to: #{event.sprintf(@topic)}")
-      #error_check(@zsocket.send_string(event.sprintf(@topic), ZMQ::SNDMORE),
-                  #"in topic send_string")
-    end
     error_check(@zsocket.send_string(payload), "in send_string")
   rescue => e
     @logger.warn("0mq output exception", :address => @address, :exception => e)
