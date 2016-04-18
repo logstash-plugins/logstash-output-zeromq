@@ -114,6 +114,10 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
   end # def server?
 
   def publish(event, payload)
+    if @topology == "pubsub"
+      topic = event.sprintf(@topic)
+      error_check(@zsocket.send_string(topic, ZMQ::SNDMORE), "in topic send_string")
+    end
     @logger.debug? && @logger.debug("0mq: sending", :event => payload)
     error_check(@zsocket.send_string(payload), "in send_string")
   rescue => e

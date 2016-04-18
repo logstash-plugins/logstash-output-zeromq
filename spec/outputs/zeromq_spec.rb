@@ -15,4 +15,16 @@ describe LogStash::Outputs::ZeroMQ, :zeromq => true do
     end
 
   end
+
+  context "pubsub" do
+    let(:plugin) { LogStash::Plugin.lookup("output", "zeromq").new({"topology" => "pubsub", "topic" => "%{topic}"})}
+
+    it "should use topic field as topic" do
+      mock_socket = instance_double("ZMQ::Socket")
+      expect(mock_socket).to receive(:send_string).with("test-topic", ZMQ::SNDMORE).and_return(0).ordered
+      expect(mock_socket).to receive(:send_string).with("publish").and_return(0).ordered
+      plugin.instance_variable_set(:@zsocket, mock_socket)
+      plugin.send(:publish, LogStash::Event.new("topic" => "test-topic", "message" => "text"), "publish")
+    end
+  end
 end
