@@ -22,9 +22,9 @@ describe LogStash::Outputs::ZeroMQ, :zeromq => true do
     it "should use topic field as topic" do
       mock_socket = instance_double("ZMQ::Socket")
       expect(mock_socket).to receive(:send_string).with("test-topic", ZMQ::SNDMORE).and_return(0).ordered
-      expect(mock_socket).to receive(:send_string).with("publish").and_return(0).ordered
+      expect(mock_socket).to receive(:send_string).with("payload").and_return(0).ordered
       plugin.instance_variable_set(:@zsocket, mock_socket)
-      plugin.send(:publish, LogStash::Event.new("topic" => "test-topic", "message" => "text"), "publish")
+      plugin.send(:publish, LogStash::Event.new("topic" => "test-topic", "message" => "text"), "payload")
     end
   end
 end
