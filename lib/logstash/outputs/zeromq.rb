@@ -61,36 +61,13 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
 
   public
   def register
-    require "ffi-rzmq"
-    require "logstash/plugin_mixins/zeromq"
-    self.class.send(:include, LogStash::PluginMixins::ZeroMQ)
+    load_zmq
 
     if @mode == "server"
       workers_not_supported("With 'mode => server', only one zeromq socket may bind to a port and may not be shared among threads. Going to single-worker mode for this plugin!")
     end
 
-    # Translate topology shorthand to socket types
-    case @topology
-    when "pair"
-      zmq_const = ZMQ::PAIR
-    when "pushpull"
-      zmq_const = ZMQ::PUSH
-    when "pubsub"
-      zmq_const = ZMQ::PUB
-    end # case socket_type
-
-    @zsocket = context.socket(zmq_const)
-
-    error_check(@zsocket.setsockopt(ZMQ::LINGER, 1),
-                "while setting ZMQ::LINGER == 1)")
-
-    if @sockopt
-      setopts(@zsocket, @sockopt)
-    end
-
-    @address.each do |addr|
-      setup(@zsocket, addr)
-    end
+    connect
 
     @codec.on_event(&method(:publish))
   end # def register
@@ -121,6 +98,38 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
     @logger.debug? && @logger.debug("0mq: sending", :event => payload)
     error_check(@zsocket.send_string(payload), "in send_string")
   rescue => e
+    warn e.inspect
     @logger.warn("0mq output exception", :address => @address, :exception => e)
+  end
+
+  def load_zmq
+    require "ffi-rzmq"
+    require "logstash/plugin_mixins/zeromq"
+    self.class.send(:include, LogStash::PluginMixins::ZeroMQ)
+  end
+
+  def connect
+    # Translate topology shorthand to socket types
+    case @topology
+    when "pair"
+      zmq_const = ZMQ::PAIR
+    when "pushpull"
+      zmq_const = ZMQ::PUSH
+    when "pubsub"
+      zmq_const = ZMQ::PUB
+    end # case socket_type
+
+    @zsocket = context.socket(zmq_const)
+
+    error_check(@zsocket.setsockopt(ZMQ::LINGER, 1),
+                "while setting ZMQ::LINGER == 1)")
+
+    if @sockopt
+      setopts(@zsocket, @sockopt)
+    end
+
+    @address.each do |addr|
+      setup(@zsocket, addr)
+    end
   end
 end # class LogStash::Outputs::ZeroMQ
