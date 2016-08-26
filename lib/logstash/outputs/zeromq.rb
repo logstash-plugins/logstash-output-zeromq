@@ -11,6 +11,9 @@ require "logstash/namespace"
 # bound to tcp://127.0.0.1:2120
 #
 class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
+  # This will be a performance bottleneck. Someone needs to upgrade this to
+  # concurrency :shared and make sure there is no breakage
+  concurrency :single 
 
   config_name "zeromq"
 
@@ -63,13 +66,7 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
   def register
     load_zmq
 
-    if @mode == "server"
-      workers_not_supported("With 'mode => server', only one zeromq socket may bind to a port and may not be shared among threads. Going to single-worker mode for this plugin!")
-    end
-
     connect
-
-    @codec.on_event(&method(:publish))
   end # def register
 
   public
@@ -81,8 +78,8 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
     end
   end # def close
 
-  def receive(event)
-    @codec.encode(event)
+  def multi_receive_encoded(events_and_encoded)
+    events_and_encoded.each {|event, encoded| self.publish(event,encoded)}
   end
 
   private

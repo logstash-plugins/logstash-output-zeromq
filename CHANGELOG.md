@@ -1,3 +1,8 @@
+## 3.1.0
+  - Move to concurrency :single for safety. This may cause some slowdown in
+    client mode, but is the easiest upgrade path. Moving to :shared would be nice
+    at some point.
+
 ## 3.0.2
   - Relax constraint on logstash-core-plugin-api to >= 1.60 <= 2.99
 
