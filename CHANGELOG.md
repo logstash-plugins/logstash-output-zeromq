@@ -1,3 +1,6 @@
+## 3.1.2
+  - Fix some documentation issues
+
 ## 3.1.0
   - Move to concurrency :single for safety. This may cause some slowdown in
     client mode, but is the easiest upgrade path. Moving to :shared would be nice
