@@ -4,7 +4,7 @@ require "logstash/namespace"
 
 # Write events to a 0MQ PUB socket.
 #
-# You need to have the 0mq 2.1.x library installed to be able to use
+# You need to have the 0mq 3.2+ or 4.x library installed to be able to use
 # this output plugin.
 #
 # The default settings will create a publisher connecting to a subscriber
@@ -46,18 +46,18 @@ class LogStash::Outputs::ZeroMQ < LogStash::Outputs::Base
   config :mode, :validate => ["server", "client"], :default => "client"
 
   # This exposes zmq_setsockopt for advanced tuning.
-  # See http://api.zeromq.org/2-1:zmq-setsockopt for details.
+  # See http://api.zeromq.org/4-1:zmq-setsockopt for details.
   #
   # This is where you would set values like:
   #
-  # * ZMQ::HWM - high water mark
+  # * ZMQ::SNDHWM - high water mark for outbound messages
   # * ZMQ::IDENTITY - named queues
-  # * ZMQ::SWAP_SIZE - space for disk overflow
+  # * ZMQ::SNDTIMEO - Maximum time before a send operation returns with EAGAIN
   #
   # Example:
   # [source,ruby]
   #     sockopt => {
-  #        "ZMQ::HWM" => 50
+  #        "ZMQ::SNDHWM" => 50
   #        "ZMQ::IDENTITY"  => "my_named_queue"
   #     }
   config :sockopt, :validate => :hash
